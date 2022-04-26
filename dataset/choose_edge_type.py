@@ -24,35 +24,36 @@ def RemoveDuplicateEdgeType(edge_types: List) -> List[str]:
     return unique_edge_types
 
 
+# There must be no duplicate elements in edge_types.
 def ChooseEdgeType(edge_type_num: int, edge_types: List, predict_class: str) -> Tuple[str]:
-    chosen_edge_types_list = []
+    # Chosen edge types should be connected to the predict_class.
+    # In other words, they should interset with explored_node_type_set.
     explored_node_type_set = {predict_class}
-    unique_edge_type = RemoveDuplicateEdgeType(edge_types)
-    remaining_edge_types = unique_edge_type.copy()
-
-    # Estimate by "coupon collector"
-    maximal_reasonable_steps = 10 * edge_type_num * \
-        int(math.log2(edge_type_num)+1)
-    step_cnt = 0
+    chosen_edge_types_list = []
+    candidate_edge_types_list = []
+    # Due to the lack of connection,
+    # these edge types cannot be chosen at the moment.
+    other_edge_types_set = set(edge_types)
 
     for _ in range(edge_type_num):
-        while True:
-            # Avoid infinite loop.
-            step_cnt += 1
-            if step_cnt > maximal_reasonable_steps or len(remaining_edge_types) == 0:
-                warnings.warn(
-                    f"Can't find enough ({edge_type_num}) edge types!", UserWarning)
-                break
+        # Move edge types from other_edge_types_set to candidate_edge_types_list.
+        edge_types_to_move = [
+            et for et in other_edge_types_set
+            if len(set(EdgeTypeStr2Tuple(et)) &
+                   explored_node_type_set) > 0]
+        candidate_edge_types_list += edge_types_to_move
+        other_edge_types_set -= set(edge_types_to_move)
 
-            edge_type_idx = random.randint(0, len(remaining_edge_types)-1)
-            new_edge_type = remaining_edge_types[edge_type_idx]
-            new_edge_type_tuple = EdgeTypeStr2Tuple(new_edge_type)
-            if len(set(new_edge_type_tuple) & explored_node_type_set) == 0:
-                continue
-            chosen_edge_types_list.append(new_edge_type)
-            explored_node_type_set |= set(new_edge_type_tuple)
-            remaining_edge_types.pop(edge_type_idx)
+        if len(candidate_edge_types_list) == 0:
+            warnings.warn(
+                f"Can't find enough ({edge_type_num}) edge types!", UserWarning)
             break
+        # Move edge types from candidate_edge_types_list to chosen_edge_types_list.
+        new_edge_type = random.choice(candidate_edge_types_list)
+        chosen_edge_types_list.append(new_edge_type)
+        candidate_edge_types_list.remove(new_edge_type)
+        explored_node_type_set |= set(EdgeTypeStr2Tuple(new_edge_type))
+
     return tuple(sorted(chosen_edge_types_list))
 
 
@@ -95,3 +96,21 @@ def ChooseMultiSubgraphs(subgraph_num: int, edge_type_num: int,
                 subgraph_edge_types_list.append(new_subgraph_edge_types)
             break
     return subgraph_edge_types_list
+
+
+def main():
+    edge_types = ['paper__to__author', 'paper__to__paper', 'paper__to__venue',
+                  'author__to__paper', 'author__to__author', 'author__to__venue',
+                  'venue__to__paper', 'venue__to__author', 'venue__to__venue',
+                  'paper__to__keyword', 'keyword__to__paper', 'keyword__to__keyword']
+    predict_class = 'paper'
+    subgraph_num = 5
+    edge_type_num = 5
+    subgraph_edge_types_list = ChooseMultiSubgraphs(
+        subgraph_num, edge_type_num, edge_types, predict_class)
+    for ele in subgraph_edge_types_list:
+        print(ele)
+
+
+if __name__ == '__main__':
+    main()
