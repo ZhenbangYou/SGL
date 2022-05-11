@@ -80,7 +80,7 @@ def main():
     SUBGRAPH_CONFIG = [(3, 2), (3, 3)]
     test_acc = OneTrialWithSubgraphConfig(dataset,
                                           SUBGRAPH_CONFIG,
-                                          num_epochs_to_train=NUM_EPOCHS)
+                                          num_epochs=NUM_EPOCHS)
 
     print('test_acc:', test_acc)
 
