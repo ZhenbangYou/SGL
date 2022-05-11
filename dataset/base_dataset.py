@@ -1,8 +1,6 @@
 import os
 import os.path as osp
-import itertools
 import warnings
-import numpy as np
 import torch
 from scipy.sparse import csr_matrix
 
@@ -407,23 +405,13 @@ class HeteroNodeDataset:
                 if not isinstance(edge_type, str):
                     raise TypeError("Edge type must be a string!")
 
-        adopted_edge_type_combinations = ChooseMultiSubgraphs(
+        chosen_edge_types = ChooseMultiSubgraphs(
             subgraph_num=random_subgraph_num,
             edge_type_num=subgraph_edge_type_num,
             edge_types=edge_types,
             predict_class=predict_class
         )
 
-        if random_subgraph_num > len(adopted_edge_type_combinations):
-            random_subgraph_num = len(adopted_edge_type_combinations)
-            warnings.warn(
-                "The input random_subgraph_num exceeds the number of all the combinations of edge types!"
-                f"\nThe random_subgraph_num has been set to {len(adopted_edge_type_combinations)}.", UserWarning)
-
-        chosen_idx = np.random.choice(np.arange(len(adopted_edge_type_combinations)), size=random_subgraph_num,
-                                      replace=False)
-        chosen_edge_types = [tuple(edge_type) for edge_type in np.array(
-            adopted_edge_type_combinations)[chosen_idx]]
         subgraph_dict = {}
         for chosen_edge_type in chosen_edge_types:
             print(chosen_edge_type)

@@ -49,6 +49,10 @@ class Dblp(HeteroNodeDataset):
         return edge_type_tuple[0]+self.EDGE_TYPE_DELIMITER+edge_type_tuple[2]
 
     @property
+    def EDGE_TYPES(self):
+        return [self.edge_type_tuple_to_str(x) for x in self.EDGE_TYPES_TUPLE]
+
+    @property
     def raw_file_paths(self):
         filepath = "dblp_" + self._name + "/raw/geometric_data_processed.pt"
         return osp.join(self._raw_dir, filepath)
