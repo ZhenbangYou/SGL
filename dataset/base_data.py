@@ -6,7 +6,7 @@ import numpy as np
 
 # Base class for adjacency matrix
 class Edge:
-    def __init__(self, row, col, edge_weight, edge_type, num_node, edge_attrs=None):
+    def __init__(self, row, col, edge_weight, edge_type, edge_attrs=None):
         if not isinstance(edge_type, str):
             raise TypeError("Edge type must be a string!")
         self.__edge_type = edge_type
@@ -21,10 +21,9 @@ class Edge:
         self.__num_edge = len(row)
 
         if isinstance(row, Tensor) or isinstance(col, Tensor):
-            self.__sparse_matrix = csr_matrix((edge_weight.numpy(), (row.numpy(), col.numpy())),
-                                              shape=(num_node, num_node))
+            self.__sparse_matrix = csr_matrix((edge_weight.numpy(), (row.numpy(), col.numpy())))
         else:
-            self.__sparse_matrix = csr_matrix((edge_weight, (row, col)), shape=(num_node, num_node))
+            self.__sparse_matrix = csr_matrix((edge_weight, (row, col)))
 
     @property
     def sparse_matrix(self):
