@@ -12,7 +12,7 @@ from auto_choose_gpu import GpuWithMaxFreeMem
 # Hyperparameters
 PROP_STEPS = 3
 HIDDEN_DIM = 256
-NUM_LAYERS = 2
+NUM_LAYERS = 1
 NUM_EPOCHS = 50
 LR = 0.01
 WEIGHT_DECAY = 0.0
@@ -77,7 +77,7 @@ def OneTrialWithSubgraphConfig(dataset, subgraph_config: List, num_epochs: int) 
 def main():
     dataset = Dblp(root='.', path_of_zip='./dataset/DBLP_processed.zip')
 
-    SUBGRAPH_CONFIG = [(3, 2), (3, 3)]
+    SUBGRAPH_CONFIG = [(2, 2), (1, 3)]
     test_acc = OneTrialWithSubgraphConfig(dataset,
                                           SUBGRAPH_CONFIG,
                                           num_epochs=NUM_EPOCHS)

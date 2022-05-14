@@ -23,7 +23,13 @@ class SIGN(BaseSGAPModel):
         self._pre_graph_op = LaplacianGraphOp(prop_steps, r=0.5)
         # self._pre_msg_op = ProjectedConcatMessageOp(0, prop_steps + 1, feat_dim, hidden_dim)
         self._pre_msg_op = ConcatMessageOp(0, prop_steps + 1)
-        self._base_model = MultiLayerPerceptron((prop_steps + 1) * feat_dim, hidden_dim, num_layers, num_classes)
+
+        if num_layers >= 2:
+            self._base_model = MultiLayerPerceptron(
+                (prop_steps + 1) * feat_dim, hidden_dim, num_layers, num_classes)
+        else:
+            self._base_model = LogisticRegression(
+                (prop_steps + 1) * feat_dim, num_classes)
 
 
 class SSGC(BaseSGAPModel):
@@ -39,9 +45,14 @@ class GBP(BaseSGAPModel):
     def __init__(self, prop_steps, feat_dim, num_classes, hidden_dim, num_layers, r=0.5, alpha=0.85):
         super(GBP, self).__init__(prop_steps, feat_dim, num_classes)
 
-        self._pre_graph_op = LaplacianGraphOp(prop_steps, r=0.5)
-        self._pre_msg_op = SimpleWeightedMessageOp(0, prop_steps + 1, "alpha", alpha)
-        self._base_model = MultiLayerPerceptron(feat_dim, hidden_dim, num_layers, num_classes)
+        self._pre_graph_op = LaplacianGraphOp(prop_steps, r=r)
+        self._pre_msg_op = SimpleWeightedMessageOp(
+            0, prop_steps + 1, "alpha", alpha)
+        if num_layers >= 2:
+            self._base_model = MultiLayerPerceptron(
+                feat_dim, hidden_dim, num_layers, num_classes)
+        else:
+            self._base_model = LogisticRegression(feat_dim, num_classes)
 
 
 class GAMLP(BaseSGAPModel):
@@ -49,8 +60,13 @@ class GAMLP(BaseSGAPModel):
         super(GAMLP, self).__init__(prop_steps, feat_dim, num_classes)
 
         self._pre_graph_op = LaplacianGraphOp(prop_steps, r=0.5)
-        self._pre_msg_op = LearnableWeightedMessageOp(0, prop_steps + 1, "jk", prop_steps, feat_dim)
-        self._base_model = MultiLayerPerceptron(feat_dim, hidden_dim, num_layers, num_classes)
+        self._pre_msg_op = LearnableWeightedMessageOp(
+            0, prop_steps + 1, "jk", prop_steps, feat_dim)
+        if num_layers >= 2:
+            self._base_model = MultiLayerPerceptron(
+                feat_dim, hidden_dim, num_layers, num_classes)
+        else:
+            self._base_model = LogisticRegression(feat_dim, num_classes)
 
 
 class GAMLPRecursive(BaseSGAPModel):
@@ -58,5 +74,10 @@ class GAMLPRecursive(BaseSGAPModel):
         super(GAMLPRecursive, self).__init__(prop_steps, feat_dim, num_classes)
 
         self._pre_graph_op = LaplacianGraphOp(prop_steps, r=0.5)
-        self._pre_msg_op = IterateLearnableWeightedMessageOp(0, prop_steps + 1, "recursive", feat_dim)
-        self._base_model = MultiLayerPerceptron(feat_dim, hidden_dim, num_layers, num_classes)
+        self._pre_msg_op = IterateLearnableWeightedMessageOp(
+            0, prop_steps + 1, "recursive", feat_dim)
+        if num_layers >= 2:
+            self._base_model = MultiLayerPerceptron(
+                feat_dim, hidden_dim, num_layers, num_classes)
+        else:
+            self._base_model = LogisticRegression(feat_dim, num_classes)

@@ -31,36 +31,6 @@ class OneDimConvolution(nn.Module):
         return aggregated_feat_list
 
 
-class OneDimConvolutionWeightSharedAcrossFeatures(nn.Module):
-    def __init__(self, num_subgraphs, prop_steps):
-        super(OneDimConvolutionWeightSharedAcrossFeatures, self).__init__()
-        self.__hop_num = prop_steps
-
-        self.__learnable_weight = nn.ParameterList()
-        for _ in range(prop_steps):
-            # To help xvarient_uniform_ calculate fan in and fan out, "1" should be kept here.
-            self.__learnable_weight.append(nn.Parameter(
-                torch.FloatTensor(1, num_subgraphs)))
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        for weight in self.__learnable_weight:
-            nn.init.xavier_uniform_(weight)
-
-    # feat_list_list = hop_num * feat_list = hop_num * (subgraph_num * feat)
-    def forward(self, feat_list_list):
-        aggregated_feat_list = []
-        for i in range(self.__hop_num):
-            adopted_feat = torch.stack(feat_list_list[i], dim=2)
-            intermediate_feat = (
-                adopted_feat * (self.__learnable_weight[i])).mean(dim=2)
-
-            aggregated_feat_list.append(intermediate_feat)
-
-        return aggregated_feat_list
-
-
 class FastOneDimConvolution(nn.Module):
     def __init__(self, num_subgraphs, prop_steps):
         super(FastOneDimConvolution, self).__init__()
